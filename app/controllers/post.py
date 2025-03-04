@@ -9,18 +9,24 @@ from ..models.user import User
 
 router = APIRouter(tags=["posts"])
 
+
 @router.post("/posts", response_model=dict, status_code=status.HTTP_201_CREATED)
 def add_post(post: PostCreate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Create a new post for the current user."""
     db_post = create_post(db, post, current_user.id)
     return {"postID": db_post.id}
 
+
 @router.get("/posts", response_model=List[PostResponse])
 def get_posts(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Retrieve all posts for the current user."""
     posts = get_user_posts(db, current_user.id)
     return posts
 
+
 @router.delete("/posts/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user_post(post_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Delete a specific post if owned by the current user."""
     success = delete_post(db, post_id, current_user.id)
     if not success:
         raise HTTPException(

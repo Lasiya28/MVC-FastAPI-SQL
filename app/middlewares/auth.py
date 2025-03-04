@@ -6,9 +6,11 @@ from ..utils.security import decode_token
 from ..services.auth import get_user_by_id
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+"""OAuth2 password bearer scheme for authentication"""
 
 
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    """Retrieves the current user based on the JWT token"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

@@ -14,6 +14,20 @@ router = APIRouter(tags=["authentication"])
 
 @router.post("/signup", response_model=Token)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
+    """
+    Registers a new user.
+
+    Args:
+        user (UserCreate): User data for registration.
+        db (Session, optional): Database session. Defaults to Depends(get_db).
+
+    Returns:
+        Token: JWT token for the new user.
+
+    Raises:
+        HTTPException:
+            - 400 Bad Request: If the email is already registered.
+    """
     db_user = get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(
@@ -23,7 +37,8 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
 
     user = create_user(db, user)
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )
@@ -33,6 +48,20 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """
+    Authenticates a user and returns a JWT token.
+
+    Args:
+        form_data (OAuth2PasswordRequestForm, optional): User credentials. Defaults to Depends().
+        db (Session, optional): Database session. Defaults to Depends(get_db).
+
+    Returns:
+        Token: JWT token for the authenticated user.
+
+    Raises:
+        HTTPException:
+            - 401 Unauthorized: If the email or password is incorrect.
+    """
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -41,7 +70,8 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": str(user.id)}, expires_delta=access_token_expires
     )

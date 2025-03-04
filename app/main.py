@@ -3,10 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from .controllers import auth, post
 
-# Create database tables
+"""Create database tables"""
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="FastAPI MVC Application")
+app = FastAPI(title="FastAPI MVC Back End Design")
 
 # Add CORS middleware
 app.add_middleware(
@@ -17,7 +17,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Add middleware to check request body size
+"""Add middleware to check request body size"""
+
+
 @app.middleware("http")
 async def check_request_body_size(request: Request, call_next):
     # Only check POST requests
@@ -29,7 +31,8 @@ async def check_request_body_size(request: Request, call_next):
             if len(body) > 1048576:  # 1 MB in bytes
                 return Response(
                     status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                    content={"detail": "Request body too large, maximum allowed size is 1 MB"},
+                    content={
+                        "detail": "Request body too large, maximum allowed size is 1 MB"},
                 )
         except Exception:
             pass
@@ -40,6 +43,7 @@ async def check_request_body_size(request: Request, call_next):
 app.include_router(auth.router)
 app.include_router(post.router)
 
+
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to FastAPI MVC Application"}
+    return {"message": "Welcome to my FastAPI/MySQL MVC based backend. Go to http://127.0.0.1:8000/docs for Swagger"}
